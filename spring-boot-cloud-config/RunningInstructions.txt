@@ -1,0 +1,9 @@
+ConfigServer
+
+1) start the config server. it starts the server on 8071 port. 
+
+2) start the Clients (accounts, loan, cards). accounts=8080, loan=8090, cards=9000.
+
+3) Refer the application.properties of each file. 
+
+4) the config files are placed in github folder.(https://github.com/tellravee/microservices-config). it's placed in configuration folder.
