@@ -1,0 +1,53 @@
+Docker  general commands:
+------------------------
+1) docker images -> what are all the docker images currently running
+2) docker  inspect eazybytes/accounts 
+        -- to inspect the images, os version etc for the images.
+		 -- eazybytes/accounts  -> repository id
+3)docker ps - to list all the running containers
+
+4) docker logs <containerid>
+
+5) to follow logs docker logs -f <containerid>
+6) docker ps -a - to see the container id in the system.
+7 docker container unpause <containerid>
+
+8)docker container inspect <containerid>
+       - mode (running, paused), java_home, java_version, image details
+
+9) docker stats
+10) docker rm <containerid>
+
+Docker hub code push/pull
+-------------------------
+
+1) docker push docker.io/<tagname>
+  example:- docker push docker.io/tellravee/accounts -> tag name is (tellravee/accounts)
+2) docker pull <tagname>
+  example:- docker pull tellravee/accounts:latest
+		 
+Docker build
+------------
+10	docker build . -t eazybytes/accounts -> build docker images
+                 - build command to build docker images.
+                 - . represents current directory
+                 - -t -> tag name. this will be the unique name in the future we can upload to docker hub and deploy.
+				 
+Docker Start :
+20)docker run -p 8080:8080 eazybytes/accounts  -> docker run images
+       			  -  run command to run docker images.
+				  - -p port . we have 2 ports 8080:8080 one for the external ports and another for internal docker hub.
+				  - eazybytes/accounts the tag what we created.
+				  
+21)Docker start <containerid>
+
+22)Docker run -d -p 8081:8080 eazybytes/accounts - this will start the docker without any logs.
+
+Docker stop:
+-----------
+30)ker stop <containerid> - to stop containerid
+31docker container pause <containerid>
+32docker kill <containerid>
+
+Difference between stop and kill 	is stop waits for few seconds for graceful exit. in case of kill it will be immediate.	  
+				  

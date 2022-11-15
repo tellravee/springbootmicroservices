@@ -1,0 +1,64 @@
+Section 8:
+Spring cloud Service Registration and discovery service.
+
+1)in the real world there can be as many as n number of microservices running. each will be having it's own ip and port numbers. it's difficult for the other services to invoke 
+and make a call. 
+
+2) if one microservice fails then other instance will be started for constant availability. it's going to have new ip and port numbers. 
+so it's going to be even more difficult as it's
+keeping changed we need a registration and discovery server to maintain the microservices list.
+application.properties.
+
+
+MicroService discovery and registration:
+1) it maintains a central server maintains the global view of address.
+2) microservices needs to register there address and servers while starting the services.
+2) the central server contains the microservice details (ip address, application name, number of running instances, instance status etc).
+3) the 2 micro services can communicate with each other with the logical name rather than the ip address etc.
+
+microservice architecture
+1) Assume we have 3 microservices. (Account, Cards, Loans service).
+Each service runs in 2 instances - Account_instance1, Account_instance2
+Each service runs in 2 instances - Loans_instance1, Loans_instance2
+Each service runs in 2 instances - Cards_instance1, Cards_instance2
+
+Each services registers with Eureka server. (eureka1).
+
+the Eureka server is responsible for getting the service. the central server contains the microservice details (ip address, application name, number of running instances, 
+instance status etc).
+
+the eureka server  receive the heartbeats messages from the services instances to know whether it's up and running,
+server side.
+eureka.client.register-with-eureka=false
+eureka.client.fetch-registry=false
+server.port=8071
+
+client side application properties.
+#eureka
+eureka.client.register-with-eureka=true
+eureka.client.fetch-registry=true
+eureka.client.service-url.defaultZone=http://localhost:8070/eureka
+
+Server side load balancing.
+@Enable Eureka server/
+1) the advantage of having Eureka services the microservices can communicate with each other using logical name. (say accounts..application name).
+  in case accounts wants to access cards application it invokes the cards webserices via /cards (logicalname).
+  the cards application sends the request to Eureka server. the eureka server checks the routing table and see the ip, port for the logical name and route the request 
+  to accounts application and it responds.
+ 
+2) in case any of the instance goes down if heart beat is not received then the request will not be received.
+
+
+Client side load balancing
+@EnableFeignClients
+@FeignClients
+the spring cloud component open feign supports the client side load balancing. the microservices interacts with the eureka server fetches the ip details , port details,
+ application details. it stores the details in the cache.
+1) when the card services invokes  Accounts Services it looks into the routing table fetches all the details. makes a call to the account services.
+
+if any of the instance went down the client updates the information from the eureka server.
+  
+self preservative mode.
+1) this is one of the feature with spring Cloud Eureka server. the eureka server receives the heart beat messages every 30 seconds. if it didnot receive the heartbeat message in 90 
+seconds it considers the instance is down. Also it checks for one more condition whether the instance threshold limit is less than 85%. in that case the eureka server considers
+it's a glitch with network and it will not send any more heartbeat messages. it runs via the cache. the above scenario is considered as self preservative mode.
