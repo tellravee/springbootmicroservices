@@ -1,0 +1,132 @@
+version: "3.8"
+services:
+  configserver:
+    image: tellravee/configserver:latest
+    mem_limit: 700m
+    ports:
+      - "8071:8071"
+    networks:
+     - tellravee
+  eurekaserver:
+    image: tellravee/eurekaserver-eureka-server:latest
+    mem_limit: 700m
+    ports:
+      - "8070:8070"
+    networks:
+      - tellravee
+    depends_on:
+      - configserver
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 25s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+  accounts:
+    image: tellravee/accounts-config-eureka-server-images-gateway:latest
+    mem_limit: 700m
+    ports:
+      - "8080:8080"
+    networks:
+      - tellravee
+    depends_on:
+      - configserver
+      - eurekaserver
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 45s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
+  accounts1:
+    image: tellravee/accounts-config-eureka-server-images:latest
+    mem_limit: 700m
+    ports:
+      - "8081:8080"
+    networks:
+      - tellravee
+    depends_on:
+      - configserver
+      - eurekaserver
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 45s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
+  loans:
+    image: tellravee/loans-config-client-eureka-services:latest
+    mem_limit: 700m
+    ports:
+      - "8090:8090"
+    networks:
+      - tellravee
+    depends_on:
+      - configserver
+      - eurekaserver
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 45s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
+  cards:
+    image: tellravee/cards-config-client-eureka-services:latest
+    mem_limit: 700m
+    ports:
+      - "9000:9000"
+    networks:
+      - tellravee
+    depends_on:
+      - configserver
+      - eurekaserver
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 45s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
+  gatewayserver:
+    image: tellravee/gatewayserver:latest
+    mem_limit: 700m
+    ports:
+      - "8072:8072"
+    networks:
+      - tellravee
+    depends_on:
+     - configserver
+     - eurekaserver
+     - cards
+     - loans
+     - accounts
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 80s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/ 
+networks:
+  tellravee:
