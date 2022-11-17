@@ -10,3 +10,4 @@ MicroServices prometheus:
 this tool will help in monitoring the microservices.
 
 Microservices graffana:
+this tools is used to create alert in case of any abnormal behaviour.
