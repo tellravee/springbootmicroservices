@@ -16,7 +16,30 @@ Spring Sleuth
  spring zipkin is used to aggregate the logs across different application in a centralized place. we can view all the logs in a single place. we can index and 
  search the logs. it's a data visualization place where it splits the logs into components wise which will help us to identify the transaction bottle neck or performance hot spots.
  
+ maven dependency : 
+ Sleuth:
+ <dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-sleuth</artifactId>
+		</dependency>
+ 
+ Zipkin:
+ <dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-sleuth-zipkin</artifactId>
+		</dependency>
+		
+Application.properties changes for sleuth
+#Synchronous way of sending logs to zipkin dashboard
+Sleuth Configuration.
+spring.sleuth.sampler.percentage=1
+# the sampler probability is the number of messages send to centralized log. (Probability of requests that should be sampled. E.g. 1.0 - 100% requests should be sampled. The precision is whole-numbers only (i.e. there's no support for 0.1% of the traces).
+spring.sleuth.sampler.probability=100
+spring.sleuth.sampler.rate=100
+
+spring.zipkin.base-url=http://localhost:9411
  synchronous log messages use zipkin
+ 
  in the application.properties add zipkin endpoint details and transfer rate
  
 To start  Rabbit mq: (this is used for Asynchronous log message centralization)
