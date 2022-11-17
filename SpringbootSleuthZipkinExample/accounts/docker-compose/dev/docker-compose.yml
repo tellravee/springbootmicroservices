@@ -1,0 +1,134 @@
+version: "3.8"
+
+services:
+  zipkin:
+    image: openzipkin/zipkin
+    mem_limit: 700m
+    ports:
+      - "9411:9411"
+    networks:
+     - tellravee
+  configserver:
+    image: tellravee/configserver-sleuth:latest
+    mem_limit: 700m
+    ports:
+      - "8071:8071"
+    networks:
+     - tellravee
+    depends_on:
+      - configserver
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/   
+  eurekaserver:
+    image: tellravee/eurekaserver-sleuth:latest
+    mem_limit: 700m
+    ports:
+      - "8070:8070"
+    networks:
+      - tellravee
+    depends_on:
+      - configserver
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 25s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/   
+  accounts:
+    image: tellravee/accounts-config-eureka-circuit-gateway-sleuth:latest
+    mem_limit: 700m
+    ports:
+      - "8080:8080"
+    networks:
+      - tellravee
+    depends_on:
+      - configserver
+      - eurekaserver
+      - zipkin
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 45s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
+      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+  loans:
+    image: tellravee/loans-config-eureka-circuit-gateway-sleuth:latest
+    mem_limit: 700m
+    ports:
+      - "8090:8090"
+    networks:
+      - tellravee
+    depends_on:
+      - configserver
+      - eurekaserver
+      - zipkin
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 45s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
+      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+  cards:
+    image: tellravee/cards-config-eureka-circuit-gateway-sleuth:latest
+    mem_limit: 700m
+    ports:
+      - "9000:9000"
+    networks:
+      - tellravee
+    depends_on:
+      - configserver
+      - eurekaserver
+      - zipkin
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 45s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
+      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+  gatewayserver:
+    image: tellravee/gatewayserver-sleuth:latest
+    mem_limit: 700m
+    ports:
+      - "8072:8072"
+    networks:
+      - tellravee
+    depends_on:
+     - configserver
+     - eurekaserver
+     - cards
+     - loans
+     - accounts
+     - zipkin
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 80s
+        max_attempts: 3
+        window: 120s
+    environment:
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_CONFIG_IMPORT: configserver:http://configserver:8071/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
+      SPRING_ZIPKIN_BASEURL: http://zipkin:9411/
+networks:
+  tellravee:
