@@ -14,3 +14,9 @@ Master node components:
 2) Scheduler -> the scheduler is responsible for the new microservices instances to the POD in the worker node. it goes thru the various instructions requested by the user from the etcd component (kind of database). the scheduler identifies which server has less load for the particular geography and it interacts with the kubelet component in worker node to create the container inside the pods.
 3) Control manager -> the control manager is the one which monitors the PODS / containers status. in case of PODS / containers is not working then it compares the number of desired instances against the number of current instances. if there is any mismatch it will self heal it.
 4) the etcd component act as a database (or store's information) what user has requested for configuration(micro services name, number of instances, geographical distribution)
+
+Worker nodes:
+1) the worker nodes is the one which actually contains the code or business logic which works on the actual data. it has the database for the microservices. it usually a heavy weight compare to manager node.
+2) kubelet -> this component acts as an interface for interaction with manager node. (scheduler interacts with the kubelet for microservices container orchestration.
+3) docker -> as we are building and running the docker images we need the docker to installed in the server.
+4) kube proxy -> the orchestrated container microservices is exposed to enduser via the kube proxy.
